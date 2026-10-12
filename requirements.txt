@@ -1,0 +1,12 @@
+# Graph processing and routing
+networkx==3.7
+requests==2.34.2
+
+# Analysis
+numpy==2.5.4
+
+# Visualization
+matplotlib==3.11.2
+
+# Testing
+pytest==9.1.1
