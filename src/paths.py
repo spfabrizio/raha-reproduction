@@ -1,10 +1,10 @@
 
 from itertools import islice
 import networkx as nx
-from src.topology import load_cogentco
 
 
-def generate_paths(graph: nx.Graph, source: str, target: str, num_primary: int = 4, num_backup: int = 1,) -> tuple[list[list[str]], list[list[str]]]:
+def generate_paths(graph: nx.Graph, source: str, target: str, num_primary: int = 4, num_backup: int = 1) -> tuple[list[list[str]], list[list[str]]]:
+
     if num_primary < 1 or num_backup < 0:
         raise ValueError("Invalid number of paths")
 
@@ -17,8 +17,22 @@ def generate_paths(graph: nx.Graph, source: str, target: str, num_primary: int =
     if source == target:
         raise ValueError("Source and target must differ")
 
+    # Insert nodes and edges in sorted order for deterministic
+    # tie-breaking when multiple paths have equal hop counts.
+    ordered = nx.DiGraph() if graph.is_directed() else nx.Graph()
+    ordered.add_nodes_from(sorted(graph.nodes, key=str))
+
+    edges = list(graph.edges())
+    if not graph.is_directed():
+        edges = [tuple(sorted(e, key=str)) for e in edges]
+
+    ordered.add_edges_from(sorted(edges, key=lambda e: (str(e[0]), str(e[1]))))
+
     try:
-        paths = list(islice(nx.shortest_simple_paths(graph, source, target), num_primary + num_backup,))
+        paths = list(islice(
+            nx.shortest_simple_paths(ordered, source, target),
+            num_primary + num_backup
+        ))
     except nx.NetworkXNoPath:
         paths = []
 
@@ -27,15 +41,34 @@ def generate_paths(graph: nx.Graph, source: str, target: str, num_primary: int =
 
     return primary, backup
 
-if __name__ == "__main__":
-    graph = load_cogentco()
 
-    nodes = list(graph.nodes)
-    source, target = nodes[0], nodes[-1]
+def path_edges(graph: nx.Graph, path: list[str]) -> set[tuple]:
+    if graph.is_directed():
+        return set(zip(path, path[1:]))
 
-    primary, backup = generate_paths(graph, source, target)
+    return {
+        tuple(sorted((u, v), key=str))
+        for u, v in zip(path, path[1:])
+    }
 
-    print(f"Source: {source}")
-    print(f"Target: {target}")
-    print(f"Primary paths: {primary}")
-    print(f"Backup paths: {backup}")
+
+def usable_paths(graph: nx.Graph, primary: list[list[str]], backup: list[list[str]], failed_edges: set[tuple[str, str]]) -> tuple[list[list[str]], list[list[str]]]:
+    if len(backup) > 1:
+        raise NotImplementedError("Only one backup is supported")
+
+    # Normalize undirected edges so (A,B) == (B,A).
+    failed = set()
+    for u, v in failed_edges:
+        failed.update(path_edges(graph, [u, v]))
+
+    def survives(path):
+        return not (path_edges(graph, path) & failed)
+
+    available_primary = [path for path in primary if survives(path)]
+
+    # The first backup is only eligible after a primary fails.
+    primary_failed = len(available_primary) < len(primary)
+
+    available_backup = [path for path in backup if primary_failed and survives(path)]
+
+    return available_primary, available_backup
