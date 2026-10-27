@@ -1,0 +1,14 @@
+{
+  "no_failure": {
+    "usable_primary": 4,
+    "usable_backup": 0
+  },
+  "single_edge_failure": {
+    "failed_edge": [
+      "146",
+      "152"
+    ],
+    "usable_primary": 3,
+    "usable_backup": 1
+  }
+}
