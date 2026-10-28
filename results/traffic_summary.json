@@ -1,0 +1,74 @@
+{
+  "experiment": "P0-C illustrative fixed-demand LP; not Raha Table 4",
+  "topology": "CogentCo",
+  "nodes": 197,
+  "undirected_links": 243,
+  "directed_arcs": 486,
+  "demand_matrix": [
+    {
+      "source": "0",
+      "target": "196",
+      "amount": 1000.0
+    },
+    {
+      "source": "10",
+      "target": "97",
+      "amount": 1000.0
+    },
+    {
+      "source": "100",
+      "target": "96",
+      "amount": 1000.0
+    }
+  ],
+  "assumptions": {
+    "candidate_paths": "4 primary and 1 backup; hop-count shortest",
+    "backup": "first backup eligible when any primary fails",
+    "arc_capacity_model": "uniform synthetic capacity, independent directions",
+    "arc_capacity": 1000.0,
+    "failure_model": "one undirected physical link disables both arcs",
+    "normalization": "paper Table 4 average LAG capacity",
+    "normalization_denominator": 1000.0
+  },
+  "failed_physical_link": [
+    "7",
+    "8"
+  ],
+  "healthy": {
+    "status": "optimal",
+    "requested": 3000.0,
+    "throughput": 3000.0,
+    "served_by_demand": [
+      1000.0,
+      1000.0,
+      1000.0
+    ],
+    "eligible_path_counts": [
+      4,
+      4,
+      4
+    ],
+    "path_variables": 15,
+    "max_arc_utilization": 1.0
+  },
+  "failed": {
+    "status": "optimal",
+    "requested": 3000.0,
+    "throughput": 2000.0,
+    "served_by_demand": [
+      0.0,
+      1000.0,
+      1000.0
+    ],
+    "eligible_path_counts": [
+      0,
+      4,
+      4
+    ],
+    "path_variables": 15,
+    "max_arc_utilization": 1.0
+  },
+  "raw_throughput_loss": 1000.0,
+  "sample_normalized_throughput_loss": 1.0,
+  "paper_table4_reproduction": false
+}
