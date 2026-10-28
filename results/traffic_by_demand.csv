@@ -1,0 +1,4 @@
+source,target,requested,healthy_carried,failed_carried,throughput_loss
+0,196,1000.0,1000.0,0.0,1000.0
+10,97,1000.0,1000.0,1000.0,0.0
+100,96,1000.0,1000.0,1000.0,0.0
